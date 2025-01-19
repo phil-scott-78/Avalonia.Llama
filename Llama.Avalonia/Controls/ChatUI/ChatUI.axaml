@@ -76,7 +76,6 @@
                                                     </TextBlock>
                                                 </suki:GlassCard>
                                             </DockPanel>
-
                                         </Grid>
 
                                     </DataTemplate>
