@@ -1,0 +1,74 @@
+<suki:SukiWindow
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:suki="https://github.com/kikipoulet/SukiUI"
+    xmlns:avalonia="clr-namespace:Llama.Avalonia"
+    xmlns:controls="clr-namespace:Llama.Avalonia.Controls"
+    xmlns:chatUi="clr-namespace:Llama.Avalonia.Controls.ChatUI"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="Llama.Avalonia.MainWindow"
+    x:DataType="avalonia:MainWindowViewModel"
+    MaxWidth="720"
+    MinWidth="480"
+    MinHeight="360"
+    Title="Llama.Avalonia">
+    <suki:SukiWindow.Hosts>
+        <suki:SukiToastHost Manager="{Binding ToastManager}" />
+    </suki:SukiWindow.Hosts>
+    <Grid>
+        <suki:GlassCard IsAnimated="false" Margin="25" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <suki:GroupBox Header="ChatView">
+                <DockPanel>
+                    <Grid Margin="10" DockPanel.Dock="Bottom">
+                        <DockPanel>
+                            <DockPanel.Styles>
+                                <Style Selector="Button.H:pointerover">
+                                    <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor5}" />
+                                </Style>
+                                <Style Selector="Button.H:pressed">
+                                    <Setter Property="Background" Value="{DynamicResource SukiPrimaryColor5}" />
+                                </Style>
+                                <Style Selector="TextBox.B /template/ Border">
+                                    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent"></Setter>
+                                    <Setter Property="BorderThickness" Value="0"></Setter>
+                                </Style>
+                            </DockPanel.Styles>
+                            <Border Margin="0,15" Background="{DynamicResource SukiBorderBrush}"
+                                    DockPanel.Dock="Top" Height="1">
+                            </Border>
+                            <Button Height="55" Width="55" CornerRadius="30" IsEnabled="{Binding CanChat}"
+                                    Command="{Binding Chat}" IsDefault="True" Classes="Rounded Basic H"
+                                    DockPanel.Dock="Right">
+                                <PathIcon Margin="5,3,0,0" Height="22" Width="22"
+                                          Foreground="{DynamicResource SukiLowText}">
+                                    <PathIcon.Data>
+                                        <StreamGeometry>M3.78963301,2.77233335 L24.8609339,12.8499121 C25.4837277,13.1477699 25.7471402,13.8941055 25.4492823,14.5168992 C25.326107,14.7744476 25.1184823,14.9820723 24.8609339,15.1052476 L3.78963301,25.1828263 C3.16683929,25.4806842 2.42050372,25.2172716 2.12264586,24.5944779 C1.99321184,24.3238431 1.96542524,24.015685 2.04435886,23.7262618 L4.7030903,13.9775798 L2.04435886,4.22889788 C1.8627142,3.56286745 2.25538645,2.87569101 2.92141688,2.69404635 C3.21084015,2.61511273 3.51899823,2.64289932 3.78963301,2.77233335 Z M3.63522914,4.36121177 L6.058,13.249 L17,13.25 C17.3796958,13.25 17.693491,13.5321539 17.7431534,13.8982294 L17.75,14 C17.75,14.3796958 17.4678461,14.693491 17.1017706,14.7431534 L17,14.75 L6.046,14.749 L3.63522914,23.5939479 L23.7421805,13.9775798 L3.63522914,4.36121177 Z</StreamGeometry>
+                                    </PathIcon.Data>
+                                </PathIcon>
+                            </Button>
+                            <controls:RoundedImage CornerRadius="15"
+                                                   DockPanel.Dock="Left" Height="38"
+                                                   Width="38"
+                                                   Source="Assets/human.png"
+                                                   >
+                            </controls:RoundedImage>
+
+                            <TextBox HorizontalAlignment="Stretch" Classes="B NoShadow"
+                                     Watermark="Type your message here .."
+                                     Margin="0,0,10,0"
+                                     Text="{Binding ChatMessage}"
+                                     TextWrapping="Wrap" Padding="10,5">
+                            </TextBox>
+                        </DockPanel>
+                    </Grid>
+                    <chatUi:ChatUI DockPanel.Dock="Top" Margin="0,15,0,0" Messages="{Binding Messages}"
+                                         FriendImageSource="/Assets/robot.png" UserImageSource="/Assets/human.png" />
+
+                </DockPanel>
+
+            </suki:GroupBox>
+        </suki:GlassCard>
+    </Grid>
+</suki:SukiWindow>

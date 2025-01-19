@@ -1,0 +1,91 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:controls="clr-namespace:Llama.Avalonia.Controls"
+             xmlns:chatUi="clr-namespace:Llama.Avalonia.Controls.ChatUI"
+             mc:Ignorable="d"
+             x:Class="Llama.Avalonia.Controls.ChatUI.ChatUI">
+    <UserControl.Styles>
+        <Style Selector="chatUi|ChatUI">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <DockPanel>
+                        <DockPanel.Styles>
+                            <Style Selector="Grid.FadeIn">
+                                <Style.Animations>
+                                    <Animation Duration="0:0:0.400" IterationCount="1"
+                                               FillMode="Forward"
+                                               PlaybackDirection="Normal">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="Opacity" Value="0" />
+                                            <Setter Property="ScaleTransform.ScaleX" Value="0.8"></Setter>
+                                            <Setter Property="ScaleTransform.ScaleY" Value="0.8"></Setter>
+                                            <Setter Property="TranslateTransform.Y" Value="30" />
+                                            <Setter Property="TranslateTransform.X" Value="80" />
+                                        </KeyFrame>
+
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="Opacity" Value="1" />
+                                            <Setter Property="ScaleTransform.ScaleX" Value="1"></Setter>
+                                            <Setter Property="ScaleTransform.ScaleY" Value="1"></Setter>
+                                            <Setter Property="TranslateTransform.Y" Value="0" />
+                                            <Setter Property="TranslateTransform.X" Value="0" />
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </DockPanel.Styles>
+
+                        <ScrollViewer Name="ChatScrollViewer">
+                            <ItemsControl Name="IC" ItemsSource="{TemplateBinding Messages}">
+                                <ItemsControl.DataTemplates>
+                                    <DataTemplate DataType="chatUi:ChatMessage">
+                                        <Grid RenderTransformOrigin="50%,50%" Classes="FadeIn" Margin="0,10">
+                                            <DockPanel Margin="0,0,150,0" IsVisible="{Binding !IsUser}">
+                                                <controls:RoundedImage
+                                                    Source="{Binding  $parent[chatUi:ChatUI].FriendImageSource}"
+                                                    DockPanel.Dock="Left" VerticalAlignment="Center" Margin="22,0,15,0"
+                                                    Height="38" Width="38" CornerRadius="15">
+                                                </controls:RoundedImage>
+
+                                                <suki:GlassCard IsAnimated="false" MinHeight="52" Padding="15,10"
+                                                                CornerRadius="15" MinWidth="100" MaxWidth="1000"
+                                                                HorizontalAlignment="Left">
+                                                    <ContentPresenter VerticalAlignment="Center" TextWrapping="Wrap"
+                                                                      Content="{Binding Content, Converter={x:Static chatUi:ContentToControlConverter.Instance}}">
+                                                    </ContentPresenter>
+                                                </suki:GlassCard>
+                                            </DockPanel>
+
+
+                                            <DockPanel Margin="150,0,0,0" IsVisible="{Binding IsUser}">
+                                                <controls:RoundedImage
+                                                    Source="{Binding  $parent[chatUi:ChatUI].UserImageSource}"
+                                                    DockPanel.Dock="Right" VerticalAlignment="Center"
+                                                    Margin="15,0,22,0" Height="38" Width="38" CornerRadius="15">
+                                                </controls:RoundedImage>
+
+                                                <suki:GlassCard IsAnimated="false" MinHeight="52" Padding="15,10"
+                                                                CornerRadius="15"
+                                                                MinWidth="100" HorizontalAlignment="Right">
+
+                                                    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                                                               Text="{Binding Content}">
+                                                    </TextBlock>
+                                                </suki:GlassCard>
+                                            </DockPanel>
+
+                                        </Grid>
+
+                                    </DataTemplate>
+                                </ItemsControl.DataTemplates>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+</UserControl>
