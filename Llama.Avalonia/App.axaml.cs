@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -36,8 +38,12 @@ public partial class App : Application
     
     private static ServiceProvider ConfigureServices(ServiceCollection services)
     {
+        var modelPath = System.Environment.GetCommandLineArgs().Skip(1).FirstOrDefault() ??
+                     throw new ArgumentException("Model path must be provided as command line argument");
+        
         services.AddSingleton<ISukiToastManager, SukiToastManager>();
         services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
+        services.AddSingleton<LlamaService>(new LlamaService(modelPath));
 
         return services.BuildServiceProvider();
     }

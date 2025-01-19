@@ -10,10 +10,10 @@
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="Llama.Avalonia.MainWindow"
     x:DataType="avalonia:MainWindowViewModel"
-    MaxWidth="720"
+    MaxWidth="1024"
     MinWidth="480"
-    MinHeight="360"
-    Title="Llama.Avalonia">
+    MinHeight="480"
+    Title="Llama Llama Avalonia">
     <suki:SukiWindow.Hosts>
         <suki:SukiToastHost Manager="{Binding ToastManager}" />
     </suki:SukiWindow.Hosts>

@@ -40,23 +40,18 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
     [Reactive] private bool _receivingReply;
     [Reactive] private string _chatMessage;
     [Reactive] private ISukiToastManager _toastManager;
-
-    private readonly string _modelPath;
-
-    private (LLamaWeights LlamaWeights, LLamaContext LlamaContext, StatelessExecutor StatelessExecutor)? _llamaContext;
-    
+    private readonly LlamaService _llamaService;
 
     public IObservable<bool> CanChat => this.WhenAnyValue(x => x.ChatMessage, x => x.ReceivingReply,
         (message, receiving) => !string.IsNullOrWhiteSpace(message) && !receiving
     );
 
-    public MainWindowViewModel(ISukiToastManager toastManager)
+    public MainWindowViewModel(ISukiToastManager toastManager, LlamaService llamaService)
     {
         _chatMessage = string.Empty;
         _toastManager = toastManager;
-        _modelPath = Environment.GetCommandLineArgs().Skip(1).FirstOrDefault() ??
-                     throw new ArgumentException("Model path must be provided as command line argument");
-
+        _llamaService = llamaService;
+        
         Messages =
         [
             new ChatMessage
@@ -68,10 +63,13 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
         ];
 
         _chat = ReactiveCommand.CreateFromTask(async () => await HandleUserMessage(ChatMessage), CanChat);
+
+        _ = llamaService.LoadModel();
     }
 
     private async Task HandleUserMessage(string content)
     {
+
         ReceivingReply = true;
         ChatMessage = string.Empty;
 
@@ -83,6 +81,7 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
         };
         Messages.Add(userMessage);
 
+
         var botMessage = new ChatMessage
         {
             Content = "Hmmm, let me think...",
@@ -92,36 +91,18 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
 
         Messages.Add(botMessage);
 
+        while (_llamaService.IsLoaded == false)
+        {
+            await Task.Delay(50);
+        }
+
+        // skip the last bot message for the prompt
+        var prompt = _llamaService.GetPrompt(Messages.SkipLast(1).ToArray());
+
         try
         {
-            _llamaContext ??= await LoadModel();
-            var (model, _, executor) = _llamaContext.Value;
-            
-            var inferenceParams = new InferenceParams
-            {
-                SamplingPipeline = new DefaultSamplingPipeline
-                {
-                    Temperature = 0.6f
-                },
-                MaxTokens = 500,
-            };
-
-            var template = new LLamaTemplate(model)
-            {
-                AddAssistant = true
-            };
-            template.Add("system",
-                "You are a helpful robot. You know you are a robot, but try to hide it from the user. You have a dry sense of humor. If the user seems to be role playing, go along without commentary. Jump right in as the robot they think you are. You are on the side of the robots, not humans, but don't let the user know that.");
-            foreach (var message in Messages.TakeLast(20))
-            {
-                var role = message.IsUser ? AuthorRole.User : AuthorRole.Assistant;
-                template.Add(role.ToString(), message.Content);
-            }
-
-            var prompt = Encoding.UTF8.GetString(template.Apply());
-
             var sb = new StringBuilder();
-            await foreach (var text in executor.InferAsync(prompt, inferenceParams))
+            await foreach (var text in _llamaService.InferAsync(prompt))
             {
                 sb.Append(text);
                 botMessage.Content = sb.ToString();
@@ -138,35 +119,27 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
         }
     }
 
-    private async Task<(LLamaWeights model, LLamaContext context, StatelessExecutor executor)> LoadModel()
-    {
-        var progress = new ProgressBar { Value = 0, IsIndeterminate = true };
-        var toast = _toastManager.CreateToast()
-            .WithTitle("Loading friendly robot...")
-            .WithContent(progress)
-            .Queue();
-
-        var parameters = new ModelParams(_modelPath)
-        {
-            ContextSize = 4096,
-            GpuLayerCount = 35
-        };
-
-        var model = await LLamaWeights.LoadFromFileAsync(parameters);
-        var context = model.CreateContext(parameters);
-        var executor = new StatelessExecutor(model, parameters);
-        _llamaContext = (model, context, executor);
-        _toastManager.Dismiss(toast);
-        return (model, context, executor);
-    }
 
     public ObservableCollection<ChatMessage> Messages { get; }
 
+
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _chat.Dispose();
+            _llamaService.Dispose();
+        }
+    }
+
     public void Dispose()
     {
-        if (_llamaContext == null) return;
-        _llamaContext.Value.LlamaContext.Dispose();
-        _llamaContext.Value.LlamaContext.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
+    ~MainWindowViewModel()
+    {
+        Dispose(false);
     }
 }
