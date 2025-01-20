@@ -6,9 +6,9 @@
              xmlns:controls="clr-namespace:Llama.Avalonia.Controls"
              xmlns:chatUi="clr-namespace:Llama.Avalonia.Controls.ChatUI"
              mc:Ignorable="d"
-             x:Class="Llama.Avalonia.Controls.ChatUI.ChatUI">
+             x:Class="Llama.Avalonia.Controls.ChatUI.ChatUi">
     <UserControl.Styles>
-        <Style Selector="chatUi|ChatUI">
+        <Style Selector="chatUi|ChatUi">
             <Setter Property="Template">
                 <ControlTemplate>
                     <DockPanel>
@@ -45,7 +45,7 @@
                                         <Grid RenderTransformOrigin="50%,50%" Classes="FadeIn" Margin="0,10">
                                             <DockPanel Margin="0,0,150,0" IsVisible="{Binding !IsUser}">
                                                 <controls:RoundedImage
-                                                    Source="{Binding  $parent[chatUi:ChatUI].FriendImageSource}"
+                                                    Source="{Binding  $parent[chatUi:ChatUi].FriendImageSource}"
                                                     DockPanel.Dock="Left" VerticalAlignment="Center" Margin="22,0,15,0"
                                                     Height="38" Width="38" CornerRadius="15">
                                                 </controls:RoundedImage>
@@ -62,7 +62,7 @@
 
                                             <DockPanel Margin="150,0,0,0" IsVisible="{Binding IsUser}">
                                                 <controls:RoundedImage
-                                                    Source="{Binding  $parent[chatUi:ChatUI].UserImageSource}"
+                                                    Source="{Binding  $parent[chatUi:ChatUi].UserImageSource}"
                                                     DockPanel.Dock="Right" VerticalAlignment="Center"
                                                     Margin="15,0,22,0" Height="38" Width="38" CornerRadius="15">
                                                 </controls:RoundedImage>

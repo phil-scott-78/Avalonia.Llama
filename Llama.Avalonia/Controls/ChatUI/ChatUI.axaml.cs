@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
@@ -13,21 +12,18 @@ using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
-using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.ReactiveUI;
 using Avalonia.Styling;
 using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 
 namespace Llama.Avalonia.Controls.ChatUI;
 
-public partial class ChatUI : UserControl
+public partial class ChatUi : UserControl
 {
     private readonly CompositeDisposable _disposables = new();
 
     
-    public ChatUI()
+    public ChatUi()
     {
         InitializeComponent();
         
@@ -40,7 +36,7 @@ public partial class ChatUI : UserControl
 
                 // Subscribe to collection changes
                 var collectionChanges = Observable.FromEvent<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                    handler => (s, e) => handler(e),
+                    handler => (_, e) => handler(e),
                     handler => messages.CollectionChanged += handler,
                     handler => messages.CollectionChanged -= handler)
                     .Do(args =>
@@ -84,18 +80,19 @@ public partial class ChatUI : UserControl
             .DisposeWith(_disposables);
     }
 
-    private ScrollViewer ChatScroll;
-        
-        
+    private ScrollViewer? _chatScroll;
+   private CancellationTokenSource? _animationToken;
+
+    
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
 
-        ChatScroll =  e.NameScope.Get<ScrollViewer>("ChatScrollViewer");
+        _chatScroll =  e.NameScope.Get<ScrollViewer>("ChatScrollViewer");
     }
 
     public static readonly StyledProperty<ObservableCollection<ChatMessage>> MessagesProperty =
-        AvaloniaProperty.Register<ChatUI, ObservableCollection<ChatMessage>>(nameof(Messages), 
+        AvaloniaProperty.Register<ChatUi, ObservableCollection<ChatMessage>>(nameof(Messages), 
             defaultValue: new ObservableCollection<ChatMessage>());
 
     public ObservableCollection<ChatMessage> Messages
@@ -106,7 +103,7 @@ public partial class ChatUI : UserControl
       
 
     public static readonly StyledProperty<string> TextProperty =
-        AvaloniaProperty.Register<ChatUI, string>(nameof(Text));
+        AvaloniaProperty.Register<ChatUi, string>(nameof(Text));
         
     public string Text
     {
@@ -115,7 +112,7 @@ public partial class ChatUI : UserControl
     }
         
     public static readonly StyledProperty<IImage?> UserImageSourceProperty =
-        AvaloniaProperty.Register<ChatUI, IImage?>(nameof(UserImageSource));
+        AvaloniaProperty.Register<ChatUi, IImage?>(nameof(UserImageSource));
         
     public IImage? UserImageSource
     {
@@ -124,7 +121,7 @@ public partial class ChatUI : UserControl
     }
         
     public static readonly StyledProperty<IImage?> FriendImageSourceProperty =
-        AvaloniaProperty.Register<ChatUI, IImage?>(nameof(FriendImageSource));
+        AvaloniaProperty.Register<ChatUi, IImage?>(nameof(FriendImageSource));
         
     public IImage? FriendImageSource
     {
@@ -132,12 +129,12 @@ public partial class ChatUI : UserControl
         set => SetValue(FriendImageSourceProperty, value);
     }
         
-    private CancellationTokenSource AnimationToken;
-        
     private void ScrollToBottom()
     {
-        AnimationToken?.Cancel();
-        AnimationToken = new CancellationTokenSource();
+        if (_chatScroll == null) throw new InvalidOperationException("ChatScroll is not set");
+        
+        _animationToken?.Cancel();
+        _animationToken = new CancellationTokenSource();
         new Animation
         {
             Duration = TimeSpan.FromMilliseconds(800),
@@ -149,7 +146,7 @@ public partial class ChatUI : UserControl
             {
                 new KeyFrame()
                 {
-                    Setters = { new Setter { Property = ScrollViewer.OffsetProperty, Value = ChatScroll.Offset } },
+                    Setters = { new Setter { Property = ScrollViewer.OffsetProperty, Value = _chatScroll.Offset } },
                     KeyTime = TimeSpan.FromSeconds(0)
                 },
                 new KeyFrame()
@@ -159,28 +156,28 @@ public partial class ChatUI : UserControl
                         new Setter
                         {
                             Property = ScrollViewer.OffsetProperty,
-                            Value = new Vector(ChatScroll.Offset.X, ChatScroll.Offset.Y + 500)
+                            Value = new Vector(_chatScroll.Offset.X, _chatScroll.Offset.Y + 500)
                         }
                     },
                     KeyTime = TimeSpan.FromMilliseconds(800)
                 }
             }
-        }.RunAsync(ChatScroll, AnimationToken.Token);
+        }.RunAsync(_chatScroll, _animationToken.Token);
     }
 }
 
 public class ContentToControlConverter : IValueConverter
 {
     public static ContentToControlConverter Instance = new();
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string)
-            return new TextBlock() { Text = (string?)value };
+        if (value is string s)
+            return new MarkdownTextBlock { Markdown = s };
 
         return value;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }

@@ -39,7 +39,7 @@
                             </TextBox>
                         </DockPanel>
                     </Grid>
-                    <chatUi:ChatUI DockPanel.Dock="Top" Margin="0,15,0,0" Messages="{Binding Messages}"
+                    <chatUi:ChatUi DockPanel.Dock="Top" Margin="0,15,0,0" Messages="{Binding Messages}"
                                    FriendImageSource="/Assets/robot.png" UserImageSource="/Assets/human.png" />
 
                 </DockPanel>

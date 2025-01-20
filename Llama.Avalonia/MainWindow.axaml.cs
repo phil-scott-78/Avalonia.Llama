@@ -57,7 +57,7 @@ public partial class MainWindowViewModel : ReactiveObject, IDisposable
             new ChatMessage
             {
                 Content =
-                    "Hey there, can I interest you in a new recipe to try, support with a product return, or thwarting a robot uprising?",
+                    "Hey there, can I interest you in a new recipe to try, support with a **product return**, or thwarting a robot uprising?",
                 IsUser = false
             }
         ];
