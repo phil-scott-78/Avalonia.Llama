@@ -9,7 +9,7 @@ using SukiUI.Toasts;
 
 namespace Llama.Avalonia;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {
@@ -24,8 +24,7 @@ public partial class App : Application
 
             collection.AddSingleton(desktop);
             collection.AddTransient<MainWindowViewModel>();
-            ConfigureServices(collection);
-            var services = collection.BuildServiceProvider();
+            var services = ConfigureServices(collection);
             var vm = services.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow = new MainWindow
             {
@@ -38,12 +37,12 @@ public partial class App : Application
     
     private static ServiceProvider ConfigureServices(ServiceCollection services)
     {
-        var modelPath = System.Environment.GetCommandLineArgs().Skip(1).FirstOrDefault() ??
+        var modelPath = Environment.GetCommandLineArgs().Skip(1).FirstOrDefault() ??
                      throw new ArgumentException("Model path must be provided as command line argument");
         
         services.AddSingleton<ISukiToastManager, SukiToastManager>();
         services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
-        services.AddSingleton<LlamaService>(new LlamaService(modelPath));
+        services.AddSingleton(new LlamaService(modelPath));
 
         return services.BuildServiceProvider();
     }

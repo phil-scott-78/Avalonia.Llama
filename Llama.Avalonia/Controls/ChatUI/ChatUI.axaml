@@ -53,9 +53,7 @@
                                                 <suki:GlassCard IsAnimated="false" MinHeight="52" Padding="15,10"
                                                                 CornerRadius="15" MinWidth="100" MaxWidth="1000"
                                                                 HorizontalAlignment="Left">
-                                                    <ContentPresenter VerticalAlignment="Center" TextWrapping="Wrap"
-                                                                      Content="{Binding Content, Converter={x:Static chatUi:ContentToControlConverter.Instance}}">
-                                                    </ContentPresenter>
+                                                    <controls:MarkdownTextBlock Markdown="{Binding Content}"></controls:MarkdownTextBlock>
                                                 </suki:GlassCard>
                                             </DockPanel>
 
